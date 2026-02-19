@@ -59,11 +59,11 @@ def test_is_palindrome():
 
 
 def test_factorial():
-    # LOGIC BUG: factorial uses + instead of *, so factorial(5) returns 15 not 120
+    # LOGIC BUG (src/utils.py line 53): factorial uses + instead of *
+    # factorial(5) → 5+4+3+2+1 = 15, not 120
     assert factorial(5) == 120   # FAILS: actual returns 15
-    assert factorial(0) == 1
-    assert factorial(3) == 6     # FAILS: actual returns 6... wait 1+2+3=6, so this accidentally passes
-    assert factorial(4) == 24    # FAILS: actual returns 1+2+3+4=10
+    assert factorial(0) == 1     # passes (base case correct)
+    assert factorial(4) == 24    # FAILS: actual returns 4+3+2+1 = 10
 
 
 def test_count_words():

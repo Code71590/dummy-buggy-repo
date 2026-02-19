@@ -1,145 +1,110 @@
-DUMMY BUGGY REPOSITORY — ERROR SUMMARY
-=======================================
-Repository: dummy-buggy-repo
-Purpose: Test target for CI/CD Healing Agent (RIFT 2026 Hackathon)
+DUMMY BUGGY REPOSITORY — ERROR SUMMARY (VERIFIED)
+====================================================
+Verified by running: pytest tests/ -v  AND  flake8 src/ --max-line-length=100
 
-TOTAL BUG COUNT: 8 bugs across 5 files
-========================================
+TOTAL: 8 bugs across 5 files
+  - pytest: 2 collection errors + 2 test failures
+  - flake8: 4 distinct warnings (validator SyntaxError overlaps with pytest)
 
-----------------------------------------------------------------------
-BUG #1
-----------------------------------------------------------------------
-File       : src/utils.py
-Line       : 15
-Bug Type   : LINTING
-Description: Unused import 'os'
-Code       : import os  # never used anywhere in the file
-Fix        : Remove the "import os" statement from line 15
-Detected by: flake8 (F401 warning)
-Test Impact: Linting only, tests still pass
+======================================================================
+PYTEST RESULTS
+======================================================================
 
-----------------------------------------------------------------------
-BUG #2
-----------------------------------------------------------------------
-File       : src/utils.py
-Line       : 61
-Bug Type   : LOGIC
-Description: factorial() uses + instead of * — produces wrong results
-Code       : return n + factorial(n - 1)   (should be: return n * factorial(n - 1))
-Fix        : Change "+" to "*"
-Detected by: pytest test_utils.py::test_factorial
-Test Impact: FAIL — factorial(5) returns 15 instead of 120
-             FAIL — factorial(4) returns 10 instead of 24
+COLLECTION ERROR #1
+  File      : tests/test_validator.py
+  Error     : SyntaxError
+  Root file : src/validator.py
+  Line      : 6
+  Bug Type  : SYNTAX
+  Code      : def validate_email(email)
+  Fix       : def validate_email(email):
+  Detail    : Missing colon at end of function definition
 
-----------------------------------------------------------------------
-BUG #3
-----------------------------------------------------------------------
-File       : src/validator.py
-Line       : 8
-Bug Type   : SYNTAX
-Description: Missing colon at end of function definition
-Code       : def validate_email(email)    (missing ":" at end)
-Fix        : Change to: def validate_email(email):
-Detected by: pytest (SyntaxError at collection time)
-Test Impact: FAIL — entire test_validator.py fails to collect
+COLLECTION ERROR #2
+  File      : tests/test_data_processor.py
+  Error     : ModuleNotFoundError
+  Root file : src/data_processor.py
+  Line      : 7
+  Bug Type  : IMPORT
+  Code      : import ci_cd_test_pkg_missing
+  Fix       : Remove this import line (or replace with a valid package)
+  Detail    : Package 'ci_cd_test_pkg_missing' does not exist
 
-----------------------------------------------------------------------
-BUG #4
-----------------------------------------------------------------------
-File       : src/data_processor.py
-Line       : 7
-Bug Type   : IMPORT
-Description: Imports non-existent package 'ci_cd_test_pkg_missing'
-Code       : import ci_cd_test_pkg_missing
-Fix        : Remove the import line entirely
-Detected by: pytest (ImportError / ModuleNotFoundError at collection time)
-Test Impact: FAIL — entire test_data_processor.py fails to collect
+TEST FAILURE #1
+  Test      : tests/test_utils.py::test_factorial
+  Error     : AssertionError
+  Root file : src/utils.py
+  Line      : 53
+  Bug Type  : LOGIC
+  Code      : return n + factorial(n - 1)    (uses + instead of *)
+  Fix       : return n * factorial(n - 1)
+  Detail    : factorial(5) returns 15 instead of 120
+              factorial(4) returns 10 instead of 24
 
-----------------------------------------------------------------------
-BUG #5
-----------------------------------------------------------------------
-File       : src/data_processor.py
-Line       : 22
-Bug Type   : LOGIC
-Description: filter_by_value uses wrong comparison operator (<  instead of >)
-Code       : return [item for item in data if item.get("value", 0) < threshold]
-Fix        : Change "<" to ">"
-Detected by: pytest test_data_processor.py (after Bug #4 is fixed)
-Test Impact: FAIL — filter returns items BELOW threshold instead of above
+TEST FAILURE #2
+  Test      : tests/test_config.py::test_get_port_returns_int
+  Error     : AssertionError
+  Root file : src/config.py
+  Line      : 45
+  Bug Type  : TYPE_ERROR
+  Code      : return port   (port is str when read from os.environ)
+  Fix       : return int(port)
+  Detail    : get_port() returns "9000" (str) instead of 9000 (int)
 
-----------------------------------------------------------------------
-BUG #6
-----------------------------------------------------------------------
-File       : src/config.py
-Line       : 45
-Bug Type   : TYPE_ERROR
-Description: get_port() returns str from os.environ instead of int
-Code       : port = os.environ.get("APP_PORT", self.config["port"]); return port
-Fix        : Change last line to: return int(port)
-Detected by: pytest test_config.py::test_get_port_returns_int
-Test Impact: FAIL — returns "9000" (str) instead of 9000 (int)
+======================================================================
+FLAKE8 RESULTS  (flake8 src/ --max-line-length=100)
+======================================================================
 
-----------------------------------------------------------------------
-BUG #7
-----------------------------------------------------------------------
-File       : src/formatter.py
-Line       : 7
-Bug Type   : INDENTATION
-Description: format_name() function body uses 2-space indent instead of 4-space
-Code       : Lines 7-9 use "  " (2 spaces) instead of "    " (4 spaces)
-Fix        : Change 2-space indentation to 4-space indentation
-Detected by: flake8 (E111/W indentation warning), possibly IndentationError
+FLAKE8 WARNING #1
+  File      : src/utils.py
+  Line      : 6
+  Code      : F401
+  Bug Type  : LINTING
+  Message   : 'os' imported but unused
+  Fix       : Remove 'import os' from line 6
 
-----------------------------------------------------------------------
-BUG #8
-----------------------------------------------------------------------
-File       : src/formatter.py
-Line       : 28
-Bug Type   : INDENTATION
-Description: truncate_string() has over-indented raise (12 spaces instead of 8)
-Code       :             raise TypeError(...)   (12 spaces)
-Fix        :         raise TypeError(...)       (8 spaces)
-Detected by: flake8 (E111 indentation warning)
+FLAKE8 WARNING #2
+  File      : src/formatter.py
+  Lines     : 7, 8, 9
+  Code      : E111
+  Bug Type  : INDENTATION
+  Message   : indentation is not a multiple of 4
+  Code      : format_name() function body uses 2-space indent
+  Fix       : Change 2-space indent to 4-space indent (PEP8)
 
-========================================
-TEST FAILURES SUMMARY (when pytest runs)
-========================================
+FLAKE8 WARNING #3
+  File      : src/formatter.py
+  Line      : 28
+  Code      : E117
+  Bug Type  : INDENTATION
+  Message   : over-indented
+  Code      : raise TypeError uses 12-space indent (should be 8)
+  Fix       : Reduce indentation from 12 to 8 spaces
 
-Test File                    | Failure Type        | Bug(s) | What fails
------------------------------|---------------------|--------|--------------------------------
-tests/test_validator.py      | SyntaxError         | #3     | Collection fails — no tests run
-tests/test_data_processor.py | ImportError         | #4     | Collection fails — no tests run
-tests/test_utils.py          | AssertionError      | #2     | factorial(5)==120 → actual=15
-tests/test_config.py         | AssertionError      | #6     | isinstance(port, int) → False
+FLAKE8 WARNING #4  (same as Collection Error #1)
+  File      : src/validator.py
+  Line      : 6
+  Code      : E999
+  Bug Type  : SYNTAX
+  Message   : SyntaxError: expected ':'
+  Fix       : Add colon after def validate_email(email)
 
-Flake8 Failures:
-  - F401 'os' imported but unused         src/utils.py:15       (Bug #1)
-  - E111 indentation is not multiple of 4 src/formatter.py:7    (Bug #7)
-  - E111 indentation is not multiple of 4 src/formatter.py:28   (Bug #8)
+======================================================================
+ALL BUGS — MASTER LIST
+======================================================================
 
-========================================
-EXACT TEST CASE MATCHES (from problem statement)
-========================================
+#  | File                  | Line | Bug Type    | Description
+---|------------------------|----|-------------|------------------------------------
+1  | src/utils.py           |  6 | LINTING     | Unused import 'os'
+2  | src/utils.py           | 53 | LOGIC       | factorial uses + instead of *
+3  | src/validator.py       |  6 | SYNTAX      | Missing colon in function def
+4  | src/data_processor.py  |  7 | IMPORT      | Non-existent package import
+5  | src/data_processor.py  | 22 | LOGIC       | filter_by_value uses < instead of >
+6  | src/config.py          | 45 | TYPE_ERROR  | get_port() returns str not int
+7  | src/formatter.py       |  7 | INDENTATION | 2-space indent in format_name()
+8  | src/formatter.py       | 28 | INDENTATION | Over-indented raise statement
 
-  src/utils.py — Line 15: Unused import 'os'
-  → LINTING error in src/utils.py line 15 → Fix: remove the import statement
+Note: Bug #5 (filter_by_value LOGIC) is not caught by pytest until Bug #4 is fixed first,
+because test_data_processor.py fails to import due to the ImportError in Bug #4.
 
-  src/validator.py — Line 8: Missing colon
-  → SYNTAX error in src/validator.py line 8 → Fix: add the colon at the correct position
-
-========================================
-EXPECTED AGENT BEHAVIOR
-========================================
-
-The CI/CD Healing Agent should:
-1. Clone this repository
-2. Run: pip install -r requirements.txt
-3. Run: pytest tests/ -v  → detects 2 collection errors + 2 test failures
-4. Run: flake8 src/       → detects 3 linting/indentation issues
-5. For each failure, identify: file, line, bug type, fix
-6. Apply fixes to all 8 bugs
-7. Commit each fix with [AI-AGENT] prefix
-8. Push to branch: TEAM_NAME_LEADER_NAME_AI_Fix
-9. Re-run tests/flake8 until all pass
-
-========================================
+======================================================================

@@ -2,17 +2,8 @@
 Utility functions for the application.
 """
 
-import json
-import math
-import re
-import sys
-import logging
 import datetime
-import collections
-import functools
-import itertools
-import string
-import os  # LINTING ERROR: unused import 'os' — line 15
+import os  # LINTING ERROR: unused import 'os' — line 6
 
 
 def add_numbers(a, b):
@@ -65,7 +56,7 @@ def factorial(n):
     """Calculate the factorial of a number."""
     if n <= 1:
         return 1
-    return n + factorial(n - 1)  # LOGIC ERROR line 61: uses + instead of * — gives wrong result
+    return n + factorial(n - 1)  # LOGIC ERROR line 53: uses + instead of * — gives wrong result
 
 
 def get_formatted_date():
