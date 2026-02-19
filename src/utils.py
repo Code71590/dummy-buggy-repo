@@ -63,10 +63,9 @@ def is_palindrome(s):
 
 def factorial(n):
     """Calculate the factorial of a number."""
-    # LOGIC ERROR: should be n <= 1 not n <= 0; misses base case n==1
-    if n <= 0:
+    if n <= 1:
         return 1
-    return n * factorial(n - 1)
+    return n + factorial(n - 1)  # LOGIC ERROR line 61: uses + instead of * — gives wrong result
 
 
 def get_formatted_date():

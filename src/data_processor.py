@@ -4,7 +4,7 @@ Data processing module with various operations.
 import json
 import csv
 from typing import List, Dict, Any
-import numpy  # IMPORT ERROR: numpy not in requirements, will cause ImportError
+import ci_cd_test_pkg_missing  # IMPORT ERROR line 7: package does not exist, guaranteed ImportError
 
 
 def process_data(data: List[Dict]) -> List[Dict]:
@@ -22,7 +22,7 @@ def process_data(data: List[Dict]) -> List[Dict]:
 
 def filter_by_value(data: List[Dict], threshold: int) -> List[Dict]:
     """Filter records where value is above threshold."""
-    # LOGIC ERROR: should be > threshold, not < threshold
+    # LOGIC ERROR line 22: should be > threshold, not < threshold
     return [item for item in data if item.get("value", 0) < threshold]
 
 

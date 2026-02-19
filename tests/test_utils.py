@@ -59,10 +59,11 @@ def test_is_palindrome():
 
 
 def test_factorial():
-    # This test will FAIL because of the logic bug in factorial()
-    assert factorial(5) == 120
+    # LOGIC BUG: factorial uses + instead of *, so factorial(5) returns 15 not 120
+    assert factorial(5) == 120   # FAILS: actual returns 15
     assert factorial(0) == 1
-    assert factorial(1) == 1  # Bug: factorial(1) loops infinitely due to logic error
+    assert factorial(3) == 6     # FAILS: actual returns 6... wait 1+2+3=6, so this accidentally passes
+    assert factorial(4) == 24    # FAILS: actual returns 1+2+3+4=10
 
 
 def test_count_words():

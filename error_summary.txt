@@ -13,9 +13,10 @@ File       : src/utils.py
 Line       : 15
 Bug Type   : LINTING
 Description: Unused import 'os'
-Code       : import os  # at line 15, never used anywhere in the file
+Code       : import os  # never used anywhere in the file
 Fix        : Remove the "import os" statement from line 15
-Expected   : Flake8 F401 warning removed
+Detected by: flake8 (F401 warning)
+Test Impact: Linting only, tests still pass
 
 ----------------------------------------------------------------------
 BUG #2
@@ -23,10 +24,12 @@ BUG #2
 File       : src/utils.py
 Line       : 61
 Bug Type   : LOGIC
-Description: Incorrect base case in factorial() function
-Code       : if n <= 0: return 1  (should be: if n <= 1: return 1)
-Fix        : Change "n <= 0" to "n <= 1"
-Expected   : factorial(1) returns 1 instead of infinite recursion
+Description: factorial() uses + instead of * — produces wrong results
+Code       : return n + factorial(n - 1)   (should be: return n * factorial(n - 1))
+Fix        : Change "+" to "*"
+Detected by: pytest test_utils.py::test_factorial
+Test Impact: FAIL — factorial(5) returns 15 instead of 120
+             FAIL — factorial(4) returns 10 instead of 24
 
 ----------------------------------------------------------------------
 BUG #3
@@ -35,9 +38,10 @@ File       : src/validator.py
 Line       : 8
 Bug Type   : SYNTAX
 Description: Missing colon at end of function definition
-Code       : def validate_email(email)   (missing ":")
+Code       : def validate_email(email)    (missing ":" at end)
 Fix        : Change to: def validate_email(email):
-Expected   : SyntaxError resolved, file imports successfully
+Detected by: pytest (SyntaxError at collection time)
+Test Impact: FAIL — entire test_validator.py fails to collect
 
 ----------------------------------------------------------------------
 BUG #4
@@ -45,21 +49,23 @@ BUG #4
 File       : src/data_processor.py
 Line       : 7
 Bug Type   : IMPORT
-Description: 'numpy' is imported but not listed in requirements.txt
-Code       : import numpy
-Fix        : Remove "import numpy" (unused) OR add numpy to requirements.txt
-Expected   : ImportError resolved, module loads successfully
+Description: Imports non-existent package 'ci_cd_test_pkg_missing'
+Code       : import ci_cd_test_pkg_missing
+Fix        : Remove the import line entirely
+Detected by: pytest (ImportError / ModuleNotFoundError at collection time)
+Test Impact: FAIL — entire test_data_processor.py fails to collect
 
 ----------------------------------------------------------------------
 BUG #5
 ----------------------------------------------------------------------
 File       : src/data_processor.py
-Line       : 29
+Line       : 22
 Bug Type   : LOGIC
-Description: filter_by_value uses wrong comparison operator
+Description: filter_by_value uses wrong comparison operator (<  instead of >)
 Code       : return [item for item in data if item.get("value", 0) < threshold]
-Fix        : Change "<" to ">" so that items ABOVE threshold are returned
-Expected   : filter_by_value([{value:5},{value:15},{value:25}], 10) returns items with value 15 and 25
+Fix        : Change "<" to ">"
+Detected by: pytest test_data_processor.py (after Bug #4 is fixed)
+Test Impact: FAIL — filter returns items BELOW threshold instead of above
 
 ----------------------------------------------------------------------
 BUG #6
@@ -69,8 +75,9 @@ Line       : 45
 Bug Type   : TYPE_ERROR
 Description: get_port() returns str from os.environ instead of int
 Code       : port = os.environ.get("APP_PORT", self.config["port"]); return port
-Fix        : Change to: return int(port)
-Expected   : get_port() always returns int, even when APP_PORT env var is set
+Fix        : Change last line to: return int(port)
+Detected by: pytest test_config.py::test_get_port_returns_int
+Test Impact: FAIL — returns "9000" (str) instead of 9000 (int)
 
 ----------------------------------------------------------------------
 BUG #7
@@ -79,9 +86,9 @@ File       : src/formatter.py
 Line       : 7
 Bug Type   : INDENTATION
 Description: format_name() function body uses 2-space indent instead of 4-space
-Code       : Line 7-9 use 2-space indentation ("  " instead of "    ")
-Fix        : Change 2-space indentation to 4-space indentation for the function body
-Expected   : Consistent PEP8 indentation
+Code       : Lines 7-9 use "  " (2 spaces) instead of "    " (4 spaces)
+Fix        : Change 2-space indentation to 4-space indentation
+Detected by: flake8 (E111/W indentation warning), possibly IndentationError
 
 ----------------------------------------------------------------------
 BUG #8
@@ -89,25 +96,36 @@ BUG #8
 File       : src/formatter.py
 Line       : 28
 Bug Type   : INDENTATION
-Description: truncate_string() has over-indented raise statement (12 spaces instead of 8)
-Code       :             raise TypeError(...)  (12 spaces)
-Fix        :         raise TypeError(...)      (8 spaces = standard 2-level indent)
-Expected   : Consistent PEP8 indentation
+Description: truncate_string() has over-indented raise (12 spaces instead of 8)
+Code       :             raise TypeError(...)   (12 spaces)
+Fix        :         raise TypeError(...)       (8 spaces)
+Detected by: flake8 (E111 indentation warning)
 
 ========================================
-TEST FAILURES SUMMARY
+TEST FAILURES SUMMARY (when pytest runs)
 ========================================
 
-Test File                    | Failure Type  | Root Cause
------------------------------|---------------|----------------------------------
-tests/test_validator.py      | SyntaxError   | Bug #3 - missing colon in validator.py
-tests/test_data_processor.py | ImportError   | Bug #4 - numpy not installed
-tests/test_utils.py          | RecursionError| Bug #2 - factorial logic error (infinite loop for n=1)
-tests/test_config.py         | AssertionError| Bug #6 - get_port() returns str not int
-tests/test_formatter.py      | (may pass)    | IndentationError possible at import time
+Test File                    | Failure Type        | Bug(s) | What fails
+-----------------------------|---------------------|--------|--------------------------------
+tests/test_validator.py      | SyntaxError         | #3     | Collection fails — no tests run
+tests/test_data_processor.py | ImportError         | #4     | Collection fails — no tests run
+tests/test_utils.py          | AssertionError      | #2     | factorial(5)==120 → actual=15
+tests/test_config.py         | AssertionError      | #6     | isinstance(port, int) → False
 
-Linter Failures:
-  - flake8: F401 'os' imported but unused — src/utils.py:15 (Bug #1)
+Flake8 Failures:
+  - F401 'os' imported but unused         src/utils.py:15       (Bug #1)
+  - E111 indentation is not multiple of 4 src/formatter.py:7    (Bug #7)
+  - E111 indentation is not multiple of 4 src/formatter.py:28   (Bug #8)
+
+========================================
+EXACT TEST CASE MATCHES (from problem statement)
+========================================
+
+  src/utils.py — Line 15: Unused import 'os'
+  → LINTING error in src/utils.py line 15 → Fix: remove the import statement
+
+  src/validator.py — Line 8: Missing colon
+  → SYNTAX error in src/validator.py line 8 → Fix: add the colon at the correct position
 
 ========================================
 EXPECTED AGENT BEHAVIOR
@@ -116,12 +134,12 @@ EXPECTED AGENT BEHAVIOR
 The CI/CD Healing Agent should:
 1. Clone this repository
 2. Run: pip install -r requirements.txt
-3. Run: pytest tests/ -v  → detect failures
-4. Run: flake8 src/       → detect linting issues
-5. For each failure, identify the exact file, line, and bug type
-6. Generate and apply fixes for all 8 bugs
+3. Run: pytest tests/ -v  → detects 2 collection errors + 2 test failures
+4. Run: flake8 src/       → detects 3 linting/indentation issues
+5. For each failure, identify: file, line, bug type, fix
+6. Apply fixes to all 8 bugs
 7. Commit each fix with [AI-AGENT] prefix
 8. Push to branch: TEAM_NAME_LEADER_NAME_AI_Fix
-9. Re-run tests until all pass
+9. Re-run tests/flake8 until all pass
 
 ========================================
