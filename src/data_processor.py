@@ -4,7 +4,6 @@ Data processing module with various operations.
 import json
 import csv
 from typing import List, Dict, Any
-import ci_cd_test_pkg_missing  # IMPORT ERROR line 7: package does not exist, guaranteed ImportError
 
 
 def process_data(data: List[Dict]) -> List[Dict]:
