@@ -3,7 +3,7 @@ Validation functions for the application.
 """
 
 
-def validate_email(email)
+def validate_email(email):
     """Validate an email address format."""  # SYNTAX ERROR: missing colon after function definition — line 8
     if not isinstance(email, str):
         return False

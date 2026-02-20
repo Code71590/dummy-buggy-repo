@@ -3,7 +3,6 @@ Utility functions for the application.
 """
 
 import datetime
-import os  # LINTING ERROR: unused import 'os' — line 6
 
 
 def add_numbers(a, b):
