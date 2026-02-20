@@ -55,7 +55,7 @@ def factorial(n):
     """Calculate the factorial of a number."""
     if n <= 1:
         return 1
-    return n + factorial(n - 1)  # LOGIC ERROR line 53: uses + instead of * — gives wrong result
+    return n * factorial(n - 1)
 
 
 def get_formatted_date():

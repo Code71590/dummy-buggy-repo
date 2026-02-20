@@ -46,7 +46,7 @@ class ConfigManager:
         """Get the port as integer."""
         # TYPE_ERROR: returns str instead of int when env var is set
         port = os.environ.get("APP_PORT", self.config["port"])
-        return port  # should be: return int(port)
+        return int(port)
 
     def get_database_url(self):
         """Build database URL from config."""

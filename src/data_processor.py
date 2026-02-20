@@ -22,7 +22,7 @@ def process_data(data: List[Dict]) -> List[Dict]:
 def filter_by_value(data: List[Dict], threshold: int) -> List[Dict]:
     """Filter records where value is above threshold."""
     # LOGIC ERROR line 22: should be > threshold, not < threshold
-    return [item for item in data if item.get("value", 0) < threshold]
+    return [item for item in data if item.get("value", 0) > threshold]
 
 
 def compute_statistics(values: List[float]) -> Dict[str, float]:
