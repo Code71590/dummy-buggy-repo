@@ -3,7 +3,7 @@ String formatting utilities.
 """
 
 
-def format_name(first, last):
+    def format_name(first, last):
     """Format first and last name into full name."""  # INDENTATION ERROR: uses 2 spaces instead of 4 spaces (inconsistent)
     full_name = first + " " + last
     return full_name.strip()
