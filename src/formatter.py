@@ -25,7 +25,7 @@ def format_percentage(value, decimal_places=2):
 
 def truncate_string(s, max_len, suffix="..."):
     """Truncate a string to max_len characters."""
-        if not isinstance(s, str):
+    if not isinstance(s, str):
         raise TypeError("Input must be a string")  # INDENTATION ERROR: extra indentation (12 spaces instead of 8)
     if len(s) <= max_len:
         return s
